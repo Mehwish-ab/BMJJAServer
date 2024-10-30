@@ -16,12 +16,13 @@ export class VideosController {
         return await this.videoservice.createVideo(videoData,file)
     }
     @Patch('/:id')
+    @UseInterceptors(FileInterceptor('thumbnail')) 
     async updateVideos(@Param('id') videoId,
-    @Body() productToPost, ){
-        return await this.videoservice.updateVideo(videoId,productToPost)
+    @Body() productToPost:createVideoDto, @UploadedFile() file: Express.Multer.File ){
+        return await this.videoservice.updateVideo(videoId,productToPost,file)
     }
-    @Delete(':/id')
-    async deleteVideos( @Param('id') videoId){
+    @Delete('/:id')
+    async deleteVideos(@Param('id') videoId){
         return await this.videoservice.deleteVideo(videoId)
     }
  

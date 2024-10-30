@@ -126,7 +126,8 @@ export class VideosService {
       }
     
       async deleteVideo(id) {
-        const video = await this.videosModel.deleteOne(id);
+        console.log("in delete",id)
+        const video = await this.videosModel.deleteOne({_id:id});
         return video;
       }
       async updateVideo(
@@ -137,7 +138,7 @@ export class VideosService {
         try {
           // Find the existing video by ID
           const existingVideo = await this.videosModel.findById(videoId);
-          
+              
           if (!existingVideo) {
             return { message: 'Video not found' };
           }

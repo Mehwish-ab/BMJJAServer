@@ -12,45 +12,7 @@ export class VideosService {
         @InjectModel("videos")
         private videosModel : Model<videoInterface> ,
     ){}
-    // async createVideo(videoData : createVideoDto, File: Express.Multer.File, ){
-      
-    //     if (!File) {
-    //         throw new Error("Thumbnail file is missing");
-    //     }
-    
-    //     // Construct the image path correctly
-    //    const ext = path.extname(File.originalname)
-    //    const imagePath = `${File.filename}${ext}`; // Use the correct file path directly
-   
-    //    console.log("file name",imagePath,File)
-    //     const embedLink = videoData.embedLink;
-    //     const videoIdMatch = embedLink.match(/(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^&\n]{11})/);
-    
-    //     if (!videoIdMatch) {
-    //         throw new Error("Invalid YouTube link format");
-    //     }
-    
-    //     const videoId = videoIdMatch[1];
-    //     const embedFormatLink = `https://www.youtube.com/embed/${videoId}`; // Transform to embed link format
-    //     try{
-            
-    //         const newVideo = await this.videosModel.create({
-    //             ...videoData,
-    //             embedLink: embedFormatLink, 
-    //             thumbnail:imagePath,
-    //             date:new Date
-    //         })
-
-    //      await newVideo.save()
-    //         return {
-    //             message : "VideoCreated" ,
-    //             newVideo
-    //            }
-    //     }catch(error){
-    //         return error
-    //     }
-
-    // }
+  
     async createVideo(videoData: createVideoDto, File: Express.Multer.File) {
         // Check if the thumbnail file is present
         if (!File) {
@@ -61,8 +23,7 @@ export class VideosService {
         const ext = path.extname(File.originalname); // Get the file extension (e.g., .png)
         const imagePath = `${File.filename}`; // Construct the filename with extension
       
-        console.log("Thumbnail filename with extension:", imagePath, File);
-      
+     
         // Validate and format the YouTube embed link
         const embedLink = videoData.embedLink;
         const videoIdMatch = embedLink.match(
@@ -98,22 +59,47 @@ export class VideosService {
         }
       }
       
-    async getVideos(queryParams: queryDto) {
-        const { page = 1, recordsPerPage = 15, search } = queryParams;
-        const totalResult = await this.videosModel.find().countDocuments();
+      async getVideos(queryParams: queryDto) {
+        const { page = 1, recordsPerPage = 15, search, category, subCategory } = queryParams;
+    
+        // Build search criteria object
+        const searchCriteria: any = {};
+    
+        // Add search filter if it exists
+        if (search) {
+            searchCriteria.$or = [
+                { title: { $regex: search, $options: 'i' } },
+                { description: { $regex: search, $options: 'i' } },
+                { smallDescription: { $regex: search, $options: 'i' } },
+            ];
+        }
+    
+        // Add category filter if it exists
+        if (category) {
+            searchCriteria.category = category;
+        }
+    
+        // Add subCategory filter if it exists
+        if (subCategory) {
+            searchCriteria.subCategory = subCategory;
+        }
+    
+        // Get total results count based on search criteria
+        const totalResult = await this.videosModel.find(searchCriteria).countDocuments();
+    
+        // Fetch paginated results based on search criteria
         const result = await this.videosModel
-          .find({
-            $or: [{ name: { $regex: `^${search}`, $options: 'i' } }],
-          })
-          .sort({ createdAt: -1 })
-          .skip((+page - 1) * +recordsPerPage)
-          .limit(+recordsPerPage);
+            .find(searchCriteria)
+            .sort({ date: -1 }) // Sort by date (or use createdAt if available)
+            .skip((+page - 1) * +recordsPerPage)
+            .limit(+recordsPerPage);
     
         return {
-          data: result,
-          totalRecords: result.length,
+            data: result,
+           // totalRecords: totalResult,
         };
-      }
+    }
+    
     
       async getAllVideos() {
         const video =await this.videosModel.find()
@@ -126,7 +112,6 @@ export class VideosService {
       }
     
       async deleteVideo(id) {
-        console.log("in delete",id)
         const video = await this.videosModel.deleteOne({_id:id});
         return video;
       }

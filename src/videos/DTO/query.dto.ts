@@ -5,5 +5,7 @@ export class queryDto{
     recordsPerPage : string 
 
     search : string
+    category:string
+    subCategory:string
     
    }

@@ -26,14 +26,15 @@ export class VideosController {
         return await this.videoservice.deleteVideo(videoId)
     }
  
-//     @Get()
-//     async getVideos(@Query(ValidationPipe) queryParams: queryDto) {
-//         return await this.videoservice.getVideos(queryParams);
-//   }
+
   @Get()
   async getVideo() {
       return await this.videoservice.getAllVideos();
 }
+// @Get()
+// async getVideos(@Query(ValidationPipe) queryParams: queryDto) {
+//     return await this.videoservice.getVideos(queryParams);
+// }
     @Post('/:id')
     async GetVideoById(@Param('id') id ){
         return await this.videoservice.getVideobyId(id)

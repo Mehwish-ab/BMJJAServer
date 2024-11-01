@@ -9,26 +9,18 @@ export class CategoriesController {
         private categoryservice : CategoriesService
     ){}
     @Post()
-    async createCategories(@Body(ValidationPipe) categoryData: CategoryDto ){
+    async createCategories(@Body() categoryData: CategoryDto ){
         return await this.categoryservice.createCategory(categoryData)
     }
-    @Patch('/:id')
-    async updateCategories(@Param('id') categoryId,
-    @Body() productToPost, ){
-        return await this.categoryservice.updateCategory(categoryId,productToPost)
-    }
-    @Delete(':/id')
+  
+
+    @Delete('/:id')
     async deleteCategories( @Param('id') categoryId){
         return await this.categoryservice.deleteCategory(categoryId)
     }
- 
     @Get()
-    async getCategories(@Query(ValidationPipe) queryParams: queryDto) {
-        return await this.categoryservice.getCategories(queryParams);
+    async getAllCategories() {
+        return await this.categoryservice.getAllCategories();
     
   }
-    @Post('/:id')
-    async GetCategoryById(@Param('id') id ){
-        return await this.categoryservice.getCategorybyId(id)
-    }
 }

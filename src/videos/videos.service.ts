@@ -60,43 +60,34 @@ export class VideosService {
       }
       
       async getVideos(queryParams: queryDto) {
-        const { page = 1, recordsPerPage = 15, search, category, subCategory } = queryParams;
-    
+        const { page , recordsPerPage ,category, subCategory } = queryParams;
+    console.log("query ",queryParams)
         // Build search criteria object
         const searchCriteria: any = {};
     
-        // Add search filter if it exists
-        if (search) {
-            searchCriteria.$or = [
-                { title: { $regex: search, $options: 'i' } },
-                { description: { $regex: search, $options: 'i' } },
-                { smallDescription: { $regex: search, $options: 'i' } },
-            ];
-        }
-    
-        // Add category filter if it exists
-        if (category) {
-            searchCriteria.category = category;
-        }
-    
-        // Add subCategory filter if it exists
-        if (subCategory) {
-            searchCriteria.subCategory = subCategory;
-        }
+     
+    if (category && category !== "" ) {
+      searchCriteria.category = category; // Filter by specific category
+  }
+  if (subCategory && subCategory !== "") {
+      searchCriteria.subCategory = subCategory; // Filter by specific subcategory
+  }
     
         // Get total results count based on search criteria
         const totalResult = await this.videosModel.find(searchCriteria).countDocuments();
-    
+        const total = await this.videosModel.find(searchCriteria)
+    console.log("searchC",searchCriteria)
         // Fetch paginated results based on search criteria
         const result = await this.videosModel
             .find(searchCriteria)
             .sort({ date: -1 }) // Sort by date (or use createdAt if available)
-            .skip((+page - 1) * +recordsPerPage)
+            // .skip((+page - 1) * +recordsPerPage)
             .limit(+recordsPerPage);
     
         return {
             data: result,
-           // totalRecords: totalResult,
+            totalRecords: totalResult,
+            total:total
         };
     }
     

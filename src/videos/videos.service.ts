@@ -60,8 +60,8 @@ export class VideosService {
       }
       
       async getVideos(queryParams: queryDto) {
-        const { page , recordsPerPage ,category, subCategory } = queryParams;
-    console.log("query ",queryParams)
+        const { recordsPerPage ,category, subCategory } = queryParams;
+        const page = Math.max(parseInt(queryParams?.page) || 1, 1);
         // Build search criteria object
         const searchCriteria: any = {};
     
@@ -76,27 +76,36 @@ export class VideosService {
         // Get total results count based on search criteria
         const totalResult = await this.videosModel.find(searchCriteria).countDocuments();
         const total = await this.videosModel.find(searchCriteria)
-    console.log("searchC",searchCriteria)
+        const totalPages = totalResult && Math.ceil(totalResult / recordsPerPage);
         // Fetch paginated results based on search criteria
         const result = await this.videosModel
             .find(searchCriteria)
             .sort({ date: -1 }) // Sort by date (or use createdAt if available)
-            // .skip((+page - 1) * +recordsPerPage)
+             .skip((+page - 1) * +recordsPerPage)
             .limit(+recordsPerPage);
     
         return {
             data: result,
             totalRecords: totalResult,
-            total:total
+            total:total,
+            pages:totalPages,
         };
     }
     
     
-      async getAllVideos() {
-        const video =await this.videosModel.find()
-        
-        return video;
-      }
+    async getAllVideos() {
+  
+  
+      // Fetch the videos for the current page
+      const video = await this.videosModel
+          .find()
+                    // Limit the number of records per page
+  
+      return {
+          video,          // Videos for the current page
+      };
+  }
+  
       async getVideobyId(id) {
         const video = await this.videosModel.findById(id).exec();
         return video;

@@ -2,7 +2,7 @@ export class queryDto{
      
     page : string
     
-    recordsPerPage : string 
+    recordsPerPage : number
 
     category:string
     subCategory:string
